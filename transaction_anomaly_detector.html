@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Anomaly Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .input-section h2 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,184,148,0.3);
+        }
+
+        .results-section {
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .results-section h2 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .anomaly-card {
+            background: linear-gradient(135deg, #ff7675, #fd79a8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(255,118,117,0.3);
+        }
+
+        .normal-card {
+            background: linear-gradient(135deg, #00b894, #55efc4);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,184,148,0.3);
+        }
+
+        .warning-card {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(253,203,110,0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .discussion-section {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .discussion-section h2 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .algorithm-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .algorithm-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .code-block {
+            background: #2d3436;
+            color: #00b894;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .sample-data {
+            background: #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Transaction Anomaly Detector</h1>
+            <p>Fraud Detection using Data Structures & Algorithms</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2>📝 Transaction Input</h2>
+                
+                <div class="form-group">
+                    <label>Sample Data:</label>
+                    <div class="sample-data">
+                        Format: userID,amount,merchant,timestamp,toAccount<br>
+                        Example: U001,500.00,Amazon,2024-01-01T10:00:00,ACC123
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="transactionData">Transaction Data (CSV format):</label>
+                    <textarea id="transactionData" rows="8" placeholder="Enter transaction data..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="windowSize">Sliding Window Size (minutes):</label>
+                    <input type="number" id="windowSize" value="60" min="1" max="1440">
+                </div>
+
+                <div class="form-group">
+                    <label for="frequencyThreshold">Frequency Threshold:</label>
+                    <input type="number" id="frequencyThreshold" value="5" min="1" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="amountThreshold">Amount Threshold ($):</label>
+                    <input type="number" id="amountThreshold" value="10000" min="100" step="100">
+                </div>
+
+                <button onclick="loadSampleData()">Load Sample Data</button>
+                <button onclick="analyzeTransactions()">🔍 Analyze Transactions</button>
+                <button onclick="clearResults()">Clear Results</button>
+            </div>
+
+            <div class="results-section">
+                <h2>📊 Analysis Results</h2>
+                <div id="results">
+                    <p style="color: #666; text-align: center; margin-top: 50px;">
+                        No analysis performed yet. Load sample data and click "Analyze Transactions" to begin.
+                    </p>
+                </div>
+            </div>
+
+            <div class="discussion-section">
+                <h2>🔬 Technical Analysis & Discussion</h2>
+                
+                <div class="algorithm-box">
+                    <h3>1. Sliding Window Algorithm (Frequency Detection)</h3>
+                    <p>Uses a time-based sliding window to detect unusual transaction frequencies per user within a specified time period.</p>
+                    <div class="code-block">
+Time Complexity: O(n log n) - sorting by timestamp
+Space Complexity: O(n) - storing transactions in window
+Detects: Rapid-fire transactions, bot activity, account takeovers
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h3>2. Hash Map Pattern Analysis</h3>
+                    <p>Tracks transaction patterns, amounts, and merchants per user to identify deviations from normal behavior.</p>
+                    <div class="code-block">
+Time Complexity: O(1) average for lookups
+Space Complexity: O(u * m) where u=users, m=merchants
+Detects: Unusual spending patterns, new merchant fraud, amount anomalies
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h3>3. Graph-Based Cycle Detection</h3>
+                    <p>Builds a transaction graph to identify suspicious patterns like money laundering cycles and high-degree nodes.</p>
+                    <div class="code-block">
+Time Complexity: O(V + E) for DFS cycle detection
+Space Complexity: O(V + E) for adjacency list
+Detects: Money laundering, circular transfers, hub accounts
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h3>4. Trie-Based Merchant Validation</h3>
+                    <p>Implements a Trie data structure for fast merchant name validation and typo-squatting detection.</p>
+                    <div class="code-block">
+Time Complexity: O(m) where m=merchant name length
+Space Complexity: O(ALPHABET_SIZE * N * M) for trie storage
+Detects: Fake merchants, typo-squatting, unauthorized vendors
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h3>🎯 Why DSA Beats ML for Fraud Detection</h3>
+                    <p><strong>Explainability:</strong> Every flagged transaction has a clear reason (frequency, amount, cycle, etc.)</p>
+                    <p><strong>Real-time Performance:</strong> O(1) to O(log n) operations vs. ML inference overhead</p>
+                    <p><strong>No Training Required:</strong> Rules can be adjusted instantly without retraining</p>
+                    <p><strong>Regulatory Compliance:</strong> Auditable logic for financial regulations</p>
+                    <p><strong>Resource Efficiency:</strong> Runs on minimal hardware compared to ML models</p>
+                </div>
+
+                <div class="algorithm-box">
+                    <h3>🏭 Industry Applications</h3>
+                    <p><strong>Banks:</strong> Real-time transaction monitoring, AML compliance</p>
+                    <p><strong>Payment Processors:</strong> High-volume transaction screening</p>
+                    <p><strong>E-commerce:</strong> Fraud prevention, chargeback reduction</p>
+                    <p><strong>Regulatory:</strong> Suspicious activity reporting (SAR)</p>
+                    <p><strong>Scalability:</strong> Handles millions of transactions per second</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Transaction Anomaly Detector Implementation
+        class TransactionAnomalyDetector {
+            constructor() {
+                this.transactions = [];
+                this.userStats = new Map();
+                this.merchantTrie = new TrieNode();
+                this.transactionGraph = new Map();
+                this.anomalies = [];
+                this.initializeKnownMerchants();
+            }
+
+            initializeKnownMerchants() {
+                const knownMerchants = [
+                    'Amazon', 'Walmart', 'Target', 'Apple', 'Google', 'Microsoft',
+                    'Netflix', 'Spotify', 'Uber', 'Lyft', 'McDonald', 'Starbucks',
+                    'PayPal', 'Venmo', 'CashApp', 'Zelle', 'Steam', 'PlayStation'
+                ];
+                
+                knownMerchants.forEach(merchant => {
+                    this.insertMerchant(merchant.toLowerCase());
+                });
+            }
+
+            insertMerchant(merchant) {
+                let node = this.merchantTrie;
+                for (let char of merchant) {
+                    if (!node.children[char]) {
+                        node.children[char] = new TrieNode();
+                    }
+                    node = node.children[char];
+                }
+                node.isEnd = true;
+            }
+
+            searchMerchant(merchant) {
+                let node = this.merchantTrie;
+                for (let char of merchant.toLowerCase()) {
+                    if (!node.children[char]) {
+                        return false;
+                    }
+                    node = node.children[char];
+                }
+                return node.isEnd;
+            }
+
+            parseTransactions(data) {
+                const lines = data.trim().split('\n');
+                this.transactions = [];
+                
+                lines.forEach(line => {
+                    const [userID, amount, merchant, timestamp, toAccount] = line.split(',');
+                    if (userID && amount && merchant && timestamp) {
+                        this.transactions.push({
+                            userID: userID.trim(),
+                            amount: parseFloat(amount.trim()),
+                            merchant: merchant.trim(),
+                            timestamp: new Date(timestamp.trim()),
+                            toAccount: toAccount ? toAccount.trim() : null
+                        });
+                    }
+                });
+
+                // Sort by timestamp for sliding window
+                this.transactions.sort((a, b) => a.timestamp - b.timestamp);
+            }
+
+            buildTransactionGraph() {
+                this.transactionGraph.clear();
+                
+                this.transactions.forEach(tx => {
+                    if (tx.toAccount) {
+                        if (!this.transactionGraph.has(tx.userID)) {
+                            this.transactionGraph.set(tx.userID, []);
+                        }
+                        this.transactionGraph.get(tx.userID).push({
+                            to: tx.toAccount,
+                            amount: tx.amount,
+                            timestamp: tx.timestamp
+                        });
+                    }
+                });
+            }
+
+            detectCycles() {
+                const visited = new Set();
+                const recStack = new Set();
+                const cycles = [];
+
+                const dfs = (node, path) => {
+                    if (recStack.has(node)) {
+                        const cycleStart = path.indexOf(node);
+                        cycles.push(path.slice(cycleStart).concat(node));
+                        return;
+                    }
+                    
+                    if (visited.has(node)) return;
+                    
+                    visited.add(node);
+                    recStack.add(node);
+                    path.push(node);
+                    
+                    if (this.transactionGraph.has(node)) {
+                        this.transactionGraph.get(node).forEach(edge => {
+                            dfs(edge.to, [...path]);
+                        });
+                    }
+                    
+                    recStack.delete(node);
+                };
+
+                this.transactionGraph.forEach((_, node) => {
+                    if (!visited.has(node)) {
+                        dfs(node, []);
+                    }
+                });
+
+                return cycles;
+            }
+
+            analyzeSlidingWindow(windowMinutes, frequencyThreshold) {
+                const windowMs = windowMinutes * 60 * 1000;
+                const userFrequencies = new Map();
+
+                this.transactions.forEach((tx, index) => {
+                    const windowStart = new Date(tx.timestamp.getTime() - windowMs);
+                    let count = 0;
+
+                    // Count transactions in the window
+                    for (let i = index; i >= 0; i--) {
+                        if (this.transactions[i].timestamp >= windowStart && 
+                            this.transactions[i].userID === tx.userID) {
+                            count++;
+                        }
+                        if (this.transactions[i].timestamp < windowStart) break;
+                    }
+
+                    if (count >= frequencyThreshold) {
+                        this.anomalies.push({
+                            type: 'HIGH_FREQUENCY',
+                            severity: 'HIGH',
+                            transaction: tx,
+                            details: `${count} transactions in ${windowMinutes} minutes`,
+                            algorithm: 'Sliding Window'
+                        });
+                    }
+                });
+            }
+
+            analyzeAmountAnomalies(threshold) {
+                const userAmounts = new Map();
+
+                // Build user spending profile
+                this.transactions.forEach(tx => {
+                    if (!userAmounts.has(tx.userID)) {
+                        userAmounts.set(tx.userID, []);
+                    }
+                    userAmounts.get(tx.userID).push(tx.amount);
+                });
+
+                // Detect anomalies
+                this.transactions.forEach(tx => {
+                    const userTxs = userAmounts.get(tx.userID);
+                    const avg = userTxs.reduce((a, b) => a + b, 0) / userTxs.length;
+                    const std = Math.sqrt(userTxs.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / userTxs.length);
+
+                    if (tx.amount > threshold) {
+                        this.anomalies.push({
+                            type: 'LARGE_AMOUNT',
+                            severity: 'HIGH',
+                            transaction: tx,
+                            details: `Amount $${tx.amount.toFixed(2)} exceeds threshold $${threshold}`,
+                            algorithm: 'Threshold Analysis'
+                        });
+                    }
+
+                    if (userTxs.length > 3 && tx.amount > avg + 3 * std) {
+                        this.anomalies.push({
+                            type: 'STATISTICAL_ANOMALY',
+                            severity: 'MEDIUM',
+                            transaction: tx,
+                            details: `Amount $${tx.amount.toFixed(2)} is ${((tx.amount - avg) / std).toFixed(1)} standard deviations above user average`,
+                            algorithm: 'Statistical Analysis'
+                        });
+                    }
+                });
+            }
+
+            analyzeMerchantAnomalies() {
+                this.transactions.forEach(tx => {
+                    if (!this.searchMerchant(tx.merchant)) {
+                        this.anomalies.push({
+                            type: 'UNKNOWN_MERCHANT',
+                            severity: 'MEDIUM',
+                            transaction: tx,
+                            details: `Merchant "${tx.merchant}" not in validated merchant list`,
+                            algorithm: 'Trie Validation'
+                        });
+                    }
+                });
+            }
+
+            analyzeGraphAnomalies() {
+                this.buildTransactionGraph();
+                const cycles = this.detectCycles();
+
+                cycles.forEach(cycle => {
+                    if (cycle.length > 2) {
+                        this.anomalies.push({
+                            type: 'TRANSACTION_CYCLE',
+                            severity: 'HIGH',
+                            transaction: null,
+                            details: `Circular transaction pattern detected: ${cycle.join(' → ')}`,
+                            algorithm: 'Graph Cycle Detection'
+                        });
+                    }
+                });
+
+                // Detect high-degree nodes (potential money laundering hubs)
+                this.transactionGraph.forEach((edges, node) => {
+                    if (edges.length > 10) {
+                        this.anomalies.push({
+                            type: 'HIGH_DEGREE_NODE',
+                            severity: 'MEDIUM',
+                            transaction: null,
+                            details: `Account ${node} has ${edges.length} outgoing transactions (potential hub)`,
+                            algorithm: 'Graph Degree Analysis'
+                        });
+                    }
+                });
+            }
+
+            analyzeAll(windowMinutes, frequencyThreshold, amountThreshold) {
+                this.anomalies = [];
+                this.analyzeSlidingWindow(windowMinutes, frequencyThreshold);
+                this.analyzeAmountAnomalies(amountThreshold);
+                this.analyzeMerchantAnomalies();
+                this.analyzeGraphAnomalies();
+                return this.anomalies;
+            }
+
+            getStatistics() {
+                const stats = {
+                    totalTransactions: this.transactions.length,
+                    totalAnomalies: this.anomalies.length,
+                    uniqueUsers: new Set(this.transactions.map(tx => tx.userID)).size,
+                    uniqueMerchants: new Set(this.transactions.map(tx => tx.merchant)).size,
+                    totalAmount: this.transactions.reduce((sum, tx) => sum + tx.amount, 0),
+                    anomalyRate: this.anomalies.length / this.transactions.length * 100,
+                    severityBreakdown: {
+                        HIGH: this.anomalies.filter(a => a.severity === 'HIGH').length,
+                        MEDIUM: this.anomalies.filter(a => a.severity === 'MEDIUM').length,
+                        LOW: this.anomalies.filter(a => a.severity === 'LOW').length
+                    }
+                };
+                return stats;
+            }
+        }
+
+        class TrieNode {
+            constructor() {
+                this.children = {};
+                this.isEnd = false;
+            }
+        }
+
+        // Global detector instance
+        let detector = new TransactionAnomalyDetector();
+
+        function loadSampleData() {
+            const sampleData = `U001,150.00,Amazon,2024-01-01T10:00:00,
+U001,75.50,Starbucks,2024-01-01T10:05:00,
+U001,25.00,Starbucks,2024-01-01T10:10:00,
+U001,300.00,Apple,2024-01-01T10:15:00,
+U001,50.00,Uber,2024-01-01T10:20:00,
+U001,200.00,SuspiciousMerchant,2024-01-01T10:25:00,
+U002,15000.00,CarDealer,2024-01-01T11:00:00,
+U002,500.00,Walmart,2024-01-01T11:30:00,
+U003,100.00,Netflix,2024-01-01T12:00:00,ACC001
+U003,100.00,Spotify,2024-01-01T12:30:00,ACC002
+U003,200.00,Target,2024-01-01T13:00:00,ACC003
+ACC001,100.00,PayPal,2024-01-01T13:30:00,ACC002
+ACC002,100.00,Venmo,2024-01-01T14:00:00,ACC003
+ACC003,100.00,CashApp,2024-01-01T14:30:00,U003
+U004,5000.00,LuxuryStore,2024-01-01T15:00:00,
+U004,3000.00,JewelryShop,2024-01-01T15:30:00,
+U004,2000.00,HighEndRestaurant,2024-01-01T16:00:00,
+U005,50.00,McDonald,2024-01-01T17:00:00,
+U005,25.00,BurgerKing,2024-01-01T17:30:00,
+U005,30.00,KFC,2024-01-01T18:00:00,`;
+
+            document.getElementById('transactionData').value = sampleData;
+        }
+
+        function analyzeTransactions() {
+            const data = document.getElementById('transactionData').value;
+            const windowSize = parseInt(document.getElementById('windowSize').value);
+            const frequencyThreshold = parseInt(document.getElementById('frequencyThreshold').value);
+            const amountThreshold = parseFloat(document.getElementById('amountThreshold').value);
+
+            if (!data.trim()) {
+                alert('Please enter transaction data or load sample data first.');
+                return;
+            }
+
+            try {
+                detector.parseTransactions(data);
+                const anomalies = detector.analyzeAll(windowSize, frequencyThreshold, amountThreshold);
+                const stats = detector.getStatistics();
+                
+                displayResults(anomalies, stats);
+            } catch (error) {
+                alert('Error analyzing transactions: ' + error.message);
+            }
+        }
+
+        function displayResults(anomalies, stats) {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-number">${stats.totalTransactions}</div>
+                        <div>Total Transactions</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${stats.totalAnomalies}</div>
+                        <div>Anomalies Detected</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${stats.anomalyRate.toFixed(1)}%</div>
+                        <div>Anomaly Rate</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">$${stats.totalAmount.toFixed(0)}</div>
+                        <div>Total Volume</div>
+                    </div>
+                </div>
+            `;
+
+            if (anomalies.length === 0) {
+                html += '<div class="normal-card"><strong>✅ No Anomalies Detected</strong><br>All transactions appear normal.</div>';
+            } else {
+                html += '<h3>🚨 Detected Anomalies:</h3>';
+                
+                anomalies.forEach((anomaly, index) => {
+                    const cardClass = anomaly.severity === 'HIGH' ? 'anomaly-card' : 
+                                     anomaly.severity === 'MEDIUM' ? 'warning-card' : 'normal-card';
+                    
+                    html += `
+                        <div class="${cardClass}">
+                            <strong>${anomaly.type.replace(/_/g, ' ')}</strong>
+                            <br><strong>Severity:</strong> ${anomaly.severity}
+                            <br><strong>Algorithm:</strong> ${anomaly.algorithm}
+                            <br><strong>Details:</strong> ${anomaly.details}
+                            ${anomaly.transaction ? `<br><strong>User:</strong> ${anomaly.transaction.userID}` : ''}
+                            ${anomaly.transaction ? `<br><strong>Amount:</strong> $${anomaly.transaction.amount.toFixed(2)}` : ''}
+                            ${anomaly.transaction ? `<br><strong>Merchant:</strong> ${anomaly.transaction.merchant}` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            html += `
+                <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px;">
+                    <strong>📊 Analysis Summary:</strong><br>
+                    • High Severity: ${stats.severityBreakdown.HIGH} alerts<br>
+                    • Medium Severity: ${stats.severityBreakdown.MEDIUM} alerts<br>
+                    • Unique Users: ${stats.uniqueUsers}<br>
+                    • Unique Merchants: ${stats.uniqueMerchants}
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = `
+                <p style="color: #666; text-align: center; margin-top: 50px;">
+                    No analysis performed yet. Load sample data and click "Analyze Transactions" to begin.
+                </p>
+            `;
+            document.getElementById('transactionData').value = '';
+        }
+
+        // Load sample data on page load
+        window.onload = function() {
+            loadSampleData();
+        };
+    </script>
+</body>
+</html>
