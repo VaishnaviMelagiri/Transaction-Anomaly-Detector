@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transaction Anomaly Detector</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 Transaction Anomaly Detector</h1>
+      <p>Fraud Detection using Data Structures & Algorithms</p>
+    </div>
+    <div class="main-content">
+      <div class="input-section">
+        <h2>📝 Transaction Input</h2>
+        <div class="form-group">
+          <label>Sample Data:</label>
+          <div class="sample-data">
+            Format: userID,amount,merchant,timestamp,toAccount<br>
+            Example: U001,500.00,Amazon,2024-01-01T10:00:00,ACC123
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="transactionData">Transaction Data (CSV format):</label>
+          <textarea id="transactionData" rows="8" placeholder="Enter transaction data..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="windowSize">Sliding Window Size (minutes):</label>
+          <input type="number" id="windowSize" value="60" min="1" max="1440">
+        </div>
+        <div class="form-group">
+          <label for="frequencyThreshold">Frequency Threshold:</label>
+          <input type="number" id="frequencyThreshold" value="5" min="1" max="100">
+        </div>
+        <div class="form-group">
+          <label for="amountThreshold">Amount Threshold ($):</label>
+          <input type="number" id="amountThreshold" value="10000" min="100" step="100">
+        </div>
+        <button onclick="loadSampleData()">Load Sample Data</button>
+        <button onclick="analyzeTransactions()">🔍 Analyze Transactions</button>
+        <button onclick="clearResults()">Clear Results</button>
+      </div>
+      <div class="results-section">
+        <h2>📊 Analysis Results</h2>
+        <div id="results">
+          <p style="color: #666; text-align: center; margin-top: 50px;">
+            No analysis performed yet. Load sample data and click "Analyze Transactions" to begin.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
