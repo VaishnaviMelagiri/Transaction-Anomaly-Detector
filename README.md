@@ -42,20 +42,12 @@ Make sure you have the following installed:
 
 ---
 
-## ⚙️ Usage
-
-1. Place your transactional data in a CSV file named transactional_data.csv in the root directory.
-The file should contain columns such as ID, timestamp, amount, and other relevant features.
-
-
-2. Run the main script to train the model and detect anomalies:
-
-   ```bash
-   python main.py
-
-
-3. The script will output the results to a file named anomalies.csv, containing a list of transactions identified as anomalies.
-
+## ⚙️How to Use
+ * Input Data: Enter your transaction data in CSV format in the "Transaction Data (CSV format)" field. Make sure the format matches the example provided.
+ * Set Parameters: Adjust the "Sliding Window Size," "Frequency Threshold," and "Amount Threshold" as needed.
+ * Analyze: Click "Analyze Transactions" to process the data.
+ * View Results: The analysis results will appear below, showing any detected anomalies.
+   
 
 
 
@@ -68,9 +60,4 @@ Feel free to open an issue or submit a pull request to suggest improvements or f
 
 ---
 
-## How to Use
- * Input Data: Enter your transaction data in CSV format in the "Transaction Data (CSV format)" field. Make sure the format matches the example provided.
- * Set Parameters: Adjust the "Sliding Window Size," "Frequency Threshold," and "Amount Threshold" as needed.
- * Analyze: Click "Analyze Transactions" to process the data.
- * View Results: The analysis results will appear below, showing any detected anomalies.
-   
+
