@@ -65,3 +65,12 @@ The file should contain columns such as ID, timestamp, amount, and other relevan
 
 We welcome contributions!
 Feel free to open an issue or submit a pull request to suggest improvements or fix issues.
+
+---
+
+## How to Use
+ * Input Data: Enter your transaction data in CSV format in the "Transaction Data (CSV format)" field. Make sure the format matches the example provided.
+ * Set Parameters: Adjust the "Sliding Window Size," "Frequency Threshold," and "Amount Threshold" as needed.
+ * Analyze: Click "Analyze Transactions" to process the data.
+ * View Results: The analysis results will appear below, showing any detected anomalies.
+   
